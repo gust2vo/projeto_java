@@ -95,15 +95,18 @@ public class CafeteriaController {
         return "Não existe esse pedido";
     }
 
-    public void alterarProduto(String nomeProduto, int quantidadeProdutoExistente, int idProduto){
-        if (verificarId(idProduto) != null) {
+    public Produto verificarNomeProduto(String nomeProduto){
+        return produtos.stream().filter(p -> p.getNomeProduto().equals(nomeProduto)).findFirst().orElse(null);
+    }
+
+    public void alterarProduto(int numeroFuncionario, String nomeProduto, int quantidadeProdutoExistente, int idProduto){
+        if (verificarId(idProduto) != null & verificarFuncionario(numeroFuncionario) != null) {
             for (Produto p : produtos) {
                 p.setNomeProduto(nomeProduto);
                 p.setQuantidadeProdutoExistente(quantidadeProdutoExistente);
                 p.setIdProduto(idProduto);
             }
         }
-        
     }
 
     @Override
