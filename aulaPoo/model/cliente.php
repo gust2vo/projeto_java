@@ -14,6 +14,16 @@ class Cliente{
         $this->telefone = $telefone;
     }
 
+    public static function pegarCliente($id = null, $nome = null, $sobrenome = null, $ddd = null, $telefone = null){
+        $novoCliente = new static();
+        $novoCliente->id = $id;
+        $novoCliente->nome = $nome;
+        $novoCliente->sobrenome = $sobrenome;
+        $novoCliente->ddd = $ddd;
+        $novoCliente->telefone = $telefone;
+        return $novoCliente;
+    }
+
     public function __get($atributo){
         return $this->$atributo;
     }

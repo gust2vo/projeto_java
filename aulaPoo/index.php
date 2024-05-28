@@ -1,5 +1,20 @@
 <?php
 namespace App;
+$token = bin2hex(random_bytes(32));
+
+$options = [
+    'name' => "_secure",
+    'cookie_httponly' => true,
+    'cookie_domain' => "meu dominio",
+
+];
+session_start($options);
+session_regenerate_id();
+$_SESSION["teste"] = "Meu teste";
+echo "<pre>";
+var_dump($_SESSION);
+echo "</pre>";
+
 require_once("./autoload.php");
 use App\controller\ClienteController as cliente;
 ?>
@@ -24,6 +39,8 @@ use App\controller\ClienteController as cliente;
         "home" => require_once("./view/home.php"),
         "cad" => cliente::cadastrar(),
         "list" => cliente::listar(),
+        "alt" => cliente::editar(),
+        "deletar" => cliente::deletar(),
         default => require_once("./view/404.php")
     };
     ?>
