@@ -1,7 +1,6 @@
 package controller;
 
 import java.util.List;
-
 import model.Cliente;
 import model.FazerPedido;
 import model.Funcionario;
@@ -50,10 +49,10 @@ public class CafeteriaController {
     }
 
     public FazerPedido verificarPedido(int numeroPedido) {
-        return fazerPedidos.stream().filter(f -> f.getNumeroCupom() == (numeroPedido)).findFirst().orElse(null);
+        return fazerPedidos.stream().filter(f -> f.getNumeroCupom() == numeroPedido).findFirst().orElse(null);
     }
 
-    public String buscarPedido(int numeroPedido) throws Exception {
+    public String buscarPedido(int numeroPedido) throws MinhaExcecao {
         try {
             if (verificarPedido(numeroPedido) != null) {
                 for (FazerPedido f : fazerPedidos) {
@@ -68,11 +67,21 @@ public class CafeteriaController {
         } catch (Exception e) {
             throw new MinhaExcecao(e.getMessage());
         }
+    }
 
+    public String cadastrarFuncionario(String nome, String dataNascimento, String endereco, int idade, String cargo) throws MinhaExcecao {
+        try {
+            int novaMatricula = gerarMatricula();
+            Funcionario novoFuncionario = new Funcionario(nome, dataNascimento, endereco, idade, novaMatricula);
+            funcionarios.add(novoFuncionario);
+            return "Funcionario cadastrado com sucesso: " + novoFuncionario.getNome();
+        } catch (Exception e) {
+            throw new MinhaExcecao("Erro ao cadastrar funcionario: " + e.getMessage());
+        }
     }
 
     public Funcionario verificarFuncionario(int numeroMatricula) throws Exception {
-        return funcionarios.stream().filter(f -> f.getMatricula() == (numeroMatricula)).findFirst()
+        return funcionarios.stream().filter(f -> f.getMatricula() == numeroMatricula).findFirst()
                 .orElseThrow(() -> new Exception("Funcionario não encontrado"));
     }
 
@@ -83,7 +92,6 @@ public class CafeteriaController {
                     if (f.getMatricula() == numeroMatricula) {
                         return "O nome do funcionario é " + f.getNome() + " e sua matricula é " + f.getMatricula();
                     }
-
                 }
                 throw new MinhaExcecao("Funcionario não encontrado");
             } else {
@@ -92,15 +100,35 @@ public class CafeteriaController {
         } catch (Exception e) {
             throw new MinhaExcecao(e.getMessage());
         }
-
     }
 
     public Produto verificarId(int numeroId) throws Exception {
-        return produtos.stream().filter(p -> p.getIdProduto() == (numeroId)).findFirst()
+        return produtos.stream().filter(p -> p.getIdProduto() == numeroId).findFirst()
                 .orElseThrow(() -> new Exception("Produto não encontrado"));
     }
 
-    public String buscarProduto(int idProduto) throws Exception {
+    public String listarProdutos() throws MinhaExcecao {
+        try {
+            if (produtos.size() == 0) {
+                return "Nenhum produto cadastrado.";
+            }
+
+            String listaDeProdutos = "Lista de Produtos:\n";
+            for (Produto p : produtos) {
+                listaDeProdutos += "ID: " + p.getIdProduto() +
+                                   ", Nome: " + p.getNomeProduto() +
+                                   ", Quantidade em estoque: " + p.getQuantidadeProdutoExistente() +
+                                   ", Valor: " + p.getValorProduto() +
+                                   "\n";
+            }
+
+            return listaDeProdutos;
+        } catch (Exception e) {
+            throw new MinhaExcecao("Erro ao listar produtos: " + e.getMessage());
+        }
+    }
+
+    public String buscarProduto(int idProduto) throws MinhaExcecao {
         try {
             if (verificarId(idProduto) != null) {
                 for (Produto p : produtos) {
@@ -108,7 +136,6 @@ public class CafeteriaController {
                         return "O id do produto é " + p.getIdProduto() + " o nome do produto é " + p.getNomeProduto()
                                 + " e sua quantidade em estoque é " + p.getQuantidadeProdutoExistente();
                     }
-
                 }
                 throw new MinhaExcecao("Produto não encontrado");
             } else {
@@ -117,16 +144,15 @@ public class CafeteriaController {
         } catch (Exception e) {
             throw new MinhaExcecao(e.getMessage());
         }
-
     }
 
-    public String excluirPedido(int numeroPedido) throws Exception {
+    public String excluirPedido(int numeroPedido) throws MinhaExcecao {
         try {
             if (verificarPedido(numeroPedido) != null) {
                 fazerPedidos.remove(verificarPedido(numeroPedido));
                 return "Pedido excluido com sucesso";
             }
-            throw new MinhaExcecao("Pedido bão encontrado");
+            throw new MinhaExcecao("Pedido não encontrado");
         } catch (Exception e) {
             throw new MinhaExcecao(e.getMessage());
         }
@@ -138,17 +164,18 @@ public class CafeteriaController {
     }
 
     public void alterarProduto(int numeroFuncionario, String nomeProduto, int quantidadeProdutoExistente,
-            int idProduto, float valorProduto) throws Exception {
+            int idProduto, float valorProduto) throws MinhaExcecao {
         try {
-            if (verificarId(idProduto) != null & verificarFuncionario(numeroFuncionario) != null) {
+            if (verificarId(idProduto) != null && verificarFuncionario(numeroFuncionario) != null) {
                 for (Produto p : produtos) {
                     p.setNomeProduto(nomeProduto);
                     p.setQuantidadeProdutoExistente(quantidadeProdutoExistente);
                     p.setIdProduto(idProduto);
                     p.setValorProduto(valorProduto);
                 }
+            } else {
+                throw new MinhaExcecao("Produto não encontrado");
             }
-            throw new MinhaExcecao("Produto não encontrado");
         } catch (Exception e) {
             throw new MinhaExcecao(e.getMessage());
         }
@@ -159,5 +186,4 @@ public class CafeteriaController {
         return "CafeteriaController [funcionarios=" + funcionarios + ", produtos=" + produtos + ", fazerPedidos="
                 + fazerPedidos + "]";
     }
-
 }
