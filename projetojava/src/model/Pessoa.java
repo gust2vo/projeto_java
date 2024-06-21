@@ -1,6 +1,8 @@
 package model;
 
-public class Pessoa {
+import java.io.Serializable;
+
+public abstract class Pessoa implements Serializable{
     private String nome, dataNascimento, endereco;
     private int idade;
 
@@ -34,12 +36,15 @@ public class Pessoa {
     public void setIdade(int idade) {
         this.idade = idade;
     }
+
+    public abstract String mostrarDetalhes();
     
     @Override
     public String toString() {
         return "Pessoa [nome=" + nome + ", dataNascimento=" + dataNascimento + ", endereco=" + endereco + ", idade="
                 + idade + "]";
     }
-
+    
+    
     
 }

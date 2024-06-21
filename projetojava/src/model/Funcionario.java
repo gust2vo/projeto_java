@@ -1,6 +1,8 @@
 package model;
 
-public class Funcionario extends Pessoa{
+import java.io.Serializable;
+
+public class Funcionario extends Pessoa implements Serializable{
     private int matricula;
 
     public Funcionario(String nome, String dataNascimento, String endereco, int idade, int matricula) {
@@ -8,12 +10,17 @@ public class Funcionario extends Pessoa{
         this.matricula = matricula;
     }
 
+    public static Funcionario criarFuncionario(String nome, String dataNascimento, String endereco, int idade, int matricula){
+        return new Funcionario(nome, dataNascimento, endereco, idade, matricula);
+    }
+
     public int getMatricula() {
         return matricula;
     }
 
-    public void setMatricula(int matricula) {
-        this.matricula = matricula;
+    @Override
+    public String mostrarDetalhes() {
+        return "Funcionário: " + getNome() + ", Matrícula: " + matricula;
     }
 
     @Override

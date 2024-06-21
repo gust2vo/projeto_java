@@ -1,6 +1,8 @@
 package model;
 
-public class Produto {
+import java.io.Serializable;
+
+public class Produto implements Serializable{
     private String nomeProduto;
     private int quantidadeProdutoExistente, idProduto;
     private float valorProduto;
@@ -10,6 +12,10 @@ public class Produto {
         this.quantidadeProdutoExistente = quantidadeProdutoExistente;
         this.idProduto = idProduto;
         this.valorProduto = valorProduto;
+    }
+
+    public static Produto criarProduto(String nomeProduto, int quantidadeProdutoExistente, int idProduto, float valorProduto){
+        return new Produto(nomeProduto, quantidadeProdutoExistente, idProduto, valorProduto);
     }
 
     public String getNomeProduto() {
@@ -44,10 +50,13 @@ public class Produto {
         this.valorProduto = valorProduto;
     }
 
+    public String mostrarProduto(){
+        return "o nome do produto é " + nomeProduto + " e a quantidade é " + quantidadeProdutoExistente;
+    }
+
     @Override
     public String toString() {
-        return "Produto [nomeProduto=" + nomeProduto + ", quantidadeProdutoExistente=" + quantidadeProdutoExistente
-                + ", idProduto=" + idProduto + ", valorProduto=" + valorProduto + "]";
+        return "" + mostrarProduto();
     }
 
     

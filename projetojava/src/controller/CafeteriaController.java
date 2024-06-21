@@ -1,189 +1,222 @@
 package controller;
 
-import java.util.List;
+import java.io.Serializable;
+import java.util.Optional;
+
 import model.Cliente;
-import model.FazerPedido;
-import model.Funcionario;
-import model.MinhaExcecao;
+import model.Pedido;
 import model.Produto;
+import model.Serializacao;
+import util.Salvar;
+import util.util;
 
-public class CafeteriaController {
-    private List<Funcionario> funcionarios;
-    private List<Produto> produtos;
-    private List<FazerPedido> fazerPedidos;
+public class CafeteriaController implements Serializacao {
+    private FuncionarioController funcionarioController;
+    private ProdutoController produtoController;
+    private PedidoController pedidoController;
 
-    public CafeteriaController(List<Funcionario> funcionarios, List<Produto> produtos, List<FazerPedido> fazerPedidos) {
-        this.funcionarios = funcionarios;
-        this.produtos = produtos;
-        this.fazerPedidos = fazerPedidos;
-    }
-
-    public int gerarMatricula() {
-        int matricula = 100;
-        for (Funcionario f : funcionarios) {
-            if (f.getMatricula() > matricula) {
-                matricula = f.getMatricula();
-            }
-        }
-        return ++matricula;
-    }
-
-    public int gerarCupom() {
-        int cupom = 0;
-        for (FazerPedido f : fazerPedidos) {
-            if (f.getNumeroCupom() > cupom) {
-                cupom = f.getNumeroCupom();
-            }
-        }
-        return ++cupom;
-    }
-
-    public int gerarIdProduto() {
-        int idProduto = 0;
-        for (Produto p : produtos) {
-            if (p.getIdProduto() > idProduto) {
-                idProduto = p.getIdProduto();
-            }
-        }
-        return ++idProduto;
-    }
-
-    public FazerPedido verificarPedido(int numeroPedido) {
-        return fazerPedidos.stream().filter(f -> f.getNumeroCupom() == numeroPedido).findFirst().orElse(null);
-    }
-
-    public String buscarPedido(int numeroPedido) throws MinhaExcecao {
+    private CafeteriaController() throws Exception {
+        this.funcionarioController = FuncionarioController.iniciaFuncionarioController();
+        this.produtoController = ProdutoController.iniciarProdutoController();
+        this.pedidoController = PedidoController.iniciarPedidoController();
         try {
-            if (verificarPedido(numeroPedido) != null) {
-                for (FazerPedido f : fazerPedidos) {
-                    if (f.getNumeroCupom() == numeroPedido) {
-                        return "O numero do pedido é " + f.getNumeroCupom() + " e o cliente foi " + f.getCliente();
-                    }
-                }
-                throw new MinhaExcecao("Pedido não encontrado");
-            } else {
-                throw new MinhaExcecao("Pedido não existe");
-            }
+            lerDados();
         } catch (Exception e) {
-            throw new MinhaExcecao(e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
 
-    public String cadastrarFuncionario(String nome, String dataNascimento, String endereco, int idade, String cargo) throws MinhaExcecao {
+    public static CafeteriaController iniciarCafeteria() throws Exception {
+        return new CafeteriaController();
+    }
+
+    public boolean verificarFuncionario(int numeroMatricula) throws Exception {
         try {
-            int novaMatricula = gerarMatricula();
-            Funcionario novoFuncionario = new Funcionario(nome, dataNascimento, endereco, idade, novaMatricula);
-            funcionarios.add(novoFuncionario);
-            return "Funcionario cadastrado com sucesso: " + novoFuncionario.getNome();
+            funcionarioController.verificarFuncionario(numeroMatricula);
+            return true;
         } catch (Exception e) {
-            throw new MinhaExcecao("Erro ao cadastrar funcionario: " + e.getMessage());
+            return false;
         }
     }
 
-    public Funcionario verificarFuncionario(int numeroMatricula) throws Exception {
-        return funcionarios.stream().filter(f -> f.getMatricula() == numeroMatricula).findFirst()
-                .orElseThrow(() -> new Exception("Funcionario não encontrado"));
+    public String cadastrarFuncionario(String nome, String dataNascimento, String endereco, String cargo)
+            throws Exception {
+        if (!util.verificarIdade(dataNascimento)) {
+            return "Para cadastrar um funcionario ele dever tem idade igual ou maior do que 18 anos";
+        }
+        int idadeCliente = util.calcularIdade(dataNascimento);
+        funcionarioController.cadastrarFuncionario(nome, dataNascimento, endereco, idadeCliente, cargo);
+        salvarDados();
+        return "Funcionario cadastrado com sucesso";
     }
 
-    public String buscarFuncionario(int numeroMatricula) throws MinhaExcecao {
-        try {
-            if (verificarFuncionario(numeroMatricula) != null) {
-                for (Funcionario f : funcionarios) {
-                    if (f.getMatricula() == numeroMatricula) {
-                        return "O nome do funcionario é " + f.getNome() + " e sua matricula é " + f.getMatricula();
-                    }
-                }
-                throw new MinhaExcecao("Funcionario não encontrado");
-            } else {
-                throw new MinhaExcecao("Funcionario não existe");
-            }
-        } catch (Exception e) {
-            throw new MinhaExcecao(e.getMessage());
+    public String listarFuncionarios() throws Exception {
+        return funcionarioController.listarFuncionarios();
+    }
+
+    public String alterarEnderecoFuncionario(int idFuncionario, String endereco) throws Exception {
+        salvarDados();
+        return funcionarioController.alterarEnderecoFuncionario(idFuncionario, endereco);
+    }
+
+    public String excluirFuncionario(int idFuncionario) throws Exception {
+        salvarDados();
+        return funcionarioController.excluirFuncionario(idFuncionario);
+    }
+
+    public String buscarFuncionario(int numeroFuncionario) throws Exception {
+        return funcionarioController.buscarFuncionario(numeroFuncionario);
+    }
+
+    public void verificarNomeProduto(String nomeProduto) throws Exception {
+        produtoController.verificarNomeProduto(nomeProduto);
+    }
+
+    public void verificarIdProduto(int idProduto) throws Exception {
+        produtoController.verificarIdProduto(idProduto);
+    }
+
+    public String cadastrarProduto(int numeroFuncionario, String nomeProduto, int quantidadeProdutoExistente,
+            float valorProduto) throws Exception {
+        if (verificarFuncionario(numeroFuncionario) && quantidadeProdutoExistente >= 0 && valorProduto >= 0.0) {
+            produtoController.cadastrarProduto(nomeProduto, quantidadeProdutoExistente, valorProduto);
+            salvarDados();
+            return "Produto cadastrado com sucesso";
+
+        }
+        return "Somente funcionarios podem cadastrar o produto";
+    }
+
+    public String listarProdutos() throws Exception {
+        return produtoController.listarProdutos();
+    }
+
+    public String listarProdutosParaClientes() throws Exception {
+        return produtoController.listarProdutosParaClientes();
+    }
+
+    public String alterarProduto(int numeroFuncionario, int idProduto, int quantidadeProdutoExistente)
+            throws Exception {
+        if (verificarFuncionario(numeroFuncionario)) {
+            produtoController.alterarQuantidadeProduto(quantidadeProdutoExistente, idProduto);
+            salvarDados();
+            return "Produto alterado com sucesso";
+        } else {
+            return "Somente funcionarios podem alterar o produto";
+        }
+
+    }
+
+    public String excluirProduto(int numeroFuncionario, int idProduto) throws Exception {
+        if (verificarFuncionario(numeroFuncionario)) {
+            salvarDados();
+            return produtoController.excluirProduto(idProduto);
+        } else {
+            return "Somente funcionarios podem excluir o produto";
         }
     }
 
-    public Produto verificarId(int numeroId) throws Exception {
-        return produtos.stream().filter(p -> p.getIdProduto() == numeroId).findFirst()
-                .orElseThrow(() -> new Exception("Produto não encontrado"));
+    public String buscarProdutoPorId(int idProduto) throws Exception {
+        return produtoController.buscarProduto(idProduto);
     }
 
-    public String listarProdutos() throws MinhaExcecao {
-        try {
-            if (produtos.size() == 0) {
-                return "Nenhum produto cadastrado.";
-            }
+    public String buscarProdutoPorNome(String nomeProduto) throws Exception {
+        return produtoController.buscarProduto(nomeProduto);
+    }
 
-            String listaDeProdutos = "Lista de Produtos:\n";
-            for (Produto p : produtos) {
-                listaDeProdutos += "ID: " + p.getIdProduto() +
-                                   ", Nome: " + p.getNomeProduto() +
-                                   ", Quantidade em estoque: " + p.getQuantidadeProdutoExistente() +
-                                   ", Valor: " + p.getValorProduto() +
-                                   "\n";
-            }
+    public String buscarProdutoPorQuantidadeOptional(int quantidadeDesejada) throws Exception {
+        return produtoController.buscarProdutoOptionalPorQuantidade(quantidadeDesejada)
+                .map(produto -> "O nome do produto é " + produto.getNomeProduto() +
+                                ", o id do produto é " + produto.getIdProduto() +
+                                " e sua quantidade em estoque é " + produto.getQuantidadeProdutoExistente())
+                .orElseThrow(() -> new Exception("Produto com quantidade desejada não encontrado"));
+    }
 
-            return listaDeProdutos;
-        } catch (Exception e) {
-            throw new MinhaExcecao("Erro ao listar produtos: " + e.getMessage());
+    public Pedido verificarPedido(int numeroPedido) throws Exception {
+        return pedidoController.verificarPedido(numeroPedido);
+    }
+
+    public String buscarPedido(int numeroPedido) throws Exception {
+        return pedidoController.buscarPedido(numeroPedido);
+    }
+
+    public String excluirPedido(int numeroPedido) throws Exception {
+        if (verificarPedido(numeroPedido) != null) {
+            pedidoController.excluirPedido(numeroPedido);
+            salvarDados();
+            return "Pedido excluido com sucesso";
         }
+        return "Este pedido não existe";
     }
 
-    public String buscarProduto(int idProduto) throws MinhaExcecao {
-        try {
-            if (verificarId(idProduto) != null) {
-                for (Produto p : produtos) {
-                    if (p.getIdProduto() == idProduto) {
-                        return "O id do produto é " + p.getIdProduto() + " o nome do produto é " + p.getNomeProduto()
-                                + " e sua quantidade em estoque é " + p.getQuantidadeProdutoExistente();
-                    }
-                }
-                throw new MinhaExcecao("Produto não encontrado");
-            } else {
-                throw new MinhaExcecao("Produto não existe");
-            }
-        } catch (Exception e) {
-            throw new MinhaExcecao(e.getMessage());
+    public String fazerPedido(String nomeCliente, String dataNascimento, String endereco, String nomeProduto,
+            int quantidade) throws Exception {
+        if (!util.verificarIdade(dataNascimento)) {
+            return "É necessario ter mais do que 14 anos para realizar um pedido";
         }
-    }
-
-    public String excluirPedido(int numeroPedido) throws MinhaExcecao {
-        try {
-            if (verificarPedido(numeroPedido) != null) {
-                fazerPedidos.remove(verificarPedido(numeroPedido));
-                return "Pedido excluido com sucesso";
-            }
-            throw new MinhaExcecao("Pedido não encontrado");
-        } catch (Exception e) {
-            throw new MinhaExcecao(e.getMessage());
+        if (quantidade <= 0) {
+            return "A quantidade de produtos informada deve ser maior que 0";
         }
-    }
 
-    public Produto verificarNomeProduto(String nomeProduto) throws Exception {
-        return produtos.stream().filter(p -> p.getNomeProduto().equals(nomeProduto)).findFirst()
-                .orElseThrow(() -> new Exception("Produto não encontrado"));
-    }
+        int idadeCliente = util.calcularIdade(dataNascimento);
 
-    public void alterarProduto(int numeroFuncionario, String nomeProduto, int quantidadeProdutoExistente,
-            int idProduto, float valorProduto) throws MinhaExcecao {
-        try {
-            if (verificarId(idProduto) != null && verificarFuncionario(numeroFuncionario) != null) {
-                for (Produto p : produtos) {
-                    p.setNomeProduto(nomeProduto);
-                    p.setQuantidadeProdutoExistente(quantidadeProdutoExistente);
-                    p.setIdProduto(idProduto);
-                    p.setValorProduto(valorProduto);
-                }
-            } else {
-                throw new MinhaExcecao("Produto não encontrado");
-            }
-        } catch (Exception e) {
-            throw new MinhaExcecao(e.getMessage());
+        Cliente cliente = Cliente.criarCliente(nomeCliente, dataNascimento, endereco, idadeCliente);
+        Produto produto = produtoController.verificarNomeProduto(nomeProduto);
+
+        if (produto.getQuantidadeProdutoExistente() < quantidade) {
+            return "Quantidade insuficiente do produto";
         }
+
+        pedidoController.fazerPedido(cliente, produto, quantidade);
+        salvarDados();
+        return "Pedido realizado com sucesso";
+    }
+
+    public String alterarQuantidadePedido(int numeroPedido, int novaQuantidade) throws Exception {
+        if (novaQuantidade <= 0) {
+            return "A quantidade informada deve ser maior que 0";
+        }
+
+        Pedido pedido = pedidoController.verificarPedido(numeroPedido);
+        if (pedido != null) {
+            Produto produto = pedido.getProduto();
+            int quantidadeAtual = pedido.getQuantidade();
+            int quantidadeDisponivel = produto.getQuantidadeProdutoExistente() + quantidadeAtual;
+
+            if (novaQuantidade > quantidadeDisponivel) {
+                return "Quantidade solicitada maior do que a disponível em estoque";
+            }
+
+            int diferencaQuantidade = novaQuantidade - quantidadeAtual;
+
+            pedido.setQuantidade(novaQuantidade);
+            produto.setQuantidadeProdutoExistente(produto.getQuantidadeProdutoExistente() - diferencaQuantidade);
+            salvarDados();
+
+            return "Quantidade do pedido alterada com sucesso";
+        }
+
+        return "Este pedido não existe";
+    }
+
+    @Override
+    public void salvarDados() throws Exception {
+        Salvar.salvarDados(funcionarioController);
+        Salvar.salvarDados(pedidoController);
+        Salvar.salvarDados(produtoController);
+    }
+
+    @Override
+    public void lerDados() throws Exception {
+        funcionarioController = Salvar.lerDadosFuncionarios();
+        pedidoController = Salvar.lerDadosPedido();
+        produtoController = Salvar.lerDadosProdutos();
     }
 
     @Override
     public String toString() {
-        return "CafeteriaController [funcionarios=" + funcionarios + ", produtos=" + produtos + ", fazerPedidos="
-                + fazerPedidos + "]";
+        return "CafeteriaController [funcionarioController=" + funcionarioController + ", produtoController="
+                + produtoController + ", pedidoController=" + pedidoController + "]";
     }
+
 }

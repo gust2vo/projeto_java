@@ -1,26 +1,28 @@
 package model;
 
-public class Cliente extends Pessoa{
-    private int quantidade;
+import java.io.Serializable;
 
-    public Cliente(String nome, String dataNascimento, String endereco, int idade, int quantidade) {
+public class Cliente extends Pessoa implements Serializable{
+   
+
+    public Cliente(String nome, String dataNascimento, String endereco, int idade) {
         super(nome, dataNascimento, endereco, idade);
-        this.quantidade = quantidade;
+       
     }
 
-    public int getQuantidade() {
-        return quantidade;
+    public static Cliente criarCliente(String nome, String dataNascimento, String endereco, int idade){
+        return new Cliente(nome, dataNascimento, endereco, idade);
     }
 
-    public void setQuantidade(int numeroCupom) {
-        this.quantidade = numeroCupom;
+    @Override
+    public String mostrarDetalhes() {
+        return "Cliente: " + getNome();
     }
 
     @Override
     public String toString() {
-        return "Cliente [quantidade=" + quantidade + "]";
+        return "Cliente []" + mostrarDetalhes();
     }
-
     
 
 }

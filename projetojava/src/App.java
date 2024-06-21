@@ -1,16 +1,17 @@
-import java.util.ArrayList;
 
-import controller.CafeteriaController;
-import model.Cliente;
+import java.util.Scanner;
 
+/**
+         * Nome do projeto: Loja de Cafe
+         * @author Ana Paula Da Silva RGM: 35652209
+         * @author Gustavo Cardoso De Almeida RGM: 8136800457
+         * @author Gustavo Santos Lima RGM: 36741736
+         */
 public class App {
     public static void main(String[] args) throws Exception {
-        CafeteriaController cafeteria = new CafeteriaController(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-
-        /*cafeteria.buscarPedido(0);
-        cafeteria.buscarFuncionario(0);
-        cafeteria.buscarFuncionario(0);*/
-        //cafeteria.alterarProduto(0, null, 0, 0);
-        cafeteria.excluirPedido(0);
+        
+        Scanner scan = new Scanner(System.in);
+        view.CafeteriaView.main(args, scan);
+         
     }
 }
