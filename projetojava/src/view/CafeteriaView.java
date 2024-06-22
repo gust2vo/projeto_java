@@ -140,7 +140,6 @@ public class CafeteriaView {
                     break;
                 case 8:
                     System.out.println("Buscar produto por nome ");
-                    scan.nextLine();
                     System.out.println("Qual o nome do produto?");
                     nomeProduto = scan.nextLine();
                     System.out.println(cafeteria.buscarProdutoPorNome(nomeProduto));
@@ -174,7 +173,7 @@ public class CafeteriaView {
                 case 11:
                     try {
                         System.out.println("Alterar Produto");
-                        System.out.println("Qual o numero seu numero de matricula? ");
+                        System.out.println("Qual o seu numero de matricula? ");
                         numeroMatricula = scan.nextInt();
                         System.out.println("Qual o id do produto");
                         idProduto = scan.nextInt();
